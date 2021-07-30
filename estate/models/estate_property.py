@@ -9,11 +9,15 @@ class EstateProperty(models.Model):
     _name = "estate.property"    # nombre tecnico
     _description = "Properties"  # nombre FUncional o Comun
 
-    name = fields.Char(string="Nombre")  #definir variable name con nombre por default
+    name = fields.Char(
+        string="Nombre", 
+        required=True
+    )  
+    #definir variable name con nombre por default
     description = fields.Text()
     postcode = fields.Char()
     date_availability = fields.Date()
-    expected_price = fields.Float()
+    expected_price = fields.Float( required=True)
     Selling_price = fields.Float()
     bedroms = fields.Integer()
     living_area = fields.Integer()
