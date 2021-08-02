@@ -11,14 +11,22 @@ class EstateProperty(models.Model):
 
     name = fields.Char(
         string="Nombre", 
-        required=True
+        required=True,
+        default="Unknown",
     )  
     # definir variable name con nombre por default
     description = fields.Text()
     postcode = fields.Char()
-    date_availability = fields.Date()
+    date_availability = fields.Date(
+        copy=False,
+        default=lambda self: fields.Date.add(
+            fields.Date.today(), months=+3) 
+    )
     expected_price = fields.Float(required=True)
-    Selling_price = fields.Float()
+    Selling_price = fields.Float(
+        readonly=True,
+        copy=False,
+    )
     bedroms = fields.Integer()
     living_area = fields.Integer()
     facades = fields.Integer()
@@ -34,3 +42,17 @@ class EstateProperty(models.Model):
         ],
         # aqui se definen los nombres tecnicos y funcionales de la seleccion.
     )
+    active = fields.Boolean(
+        default=True,
+    )
+    state = fields.Selection(
+        selection=[
+            ('new', 'New'),
+            ('offer_received', 'Offer Received'),
+            ('offer_accepted', 'Offer Accepted'),
+            ('sold', 'Offer Sold'),
+            ('canceled', 'Canceled'),
+        ],
+        default='new',
+        copy=False,
+    )       
