@@ -23,11 +23,11 @@ class EstateProperty(models.Model):
             fields.Date.today(), months=+3) 
     )
     expected_price = fields.Float(required=True)
-    Selling_price = fields.Float(
+    selling_price = fields.Float(
         readonly=True,
         copy=False,
     )
-    bedroms = fields.Integer()
+    bedrooms = fields.Integer()
     living_area = fields.Integer()
     facades = fields.Integer()
     garage = fields.Boolean()
