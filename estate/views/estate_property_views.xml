@@ -5,13 +5,19 @@
 	    <field name='model'>estate.property</field>
 	    <field name='arch' type='xml'>
 	        <tree string='description'>
-	            <field name='name' string = 'Title'/>
+	            <field name='name' string = 'Title' />
 	            <field name='postcode' string = 'Postcode'/>
 	            <field name='bedrooms' string = 'Bedrooms'/>
 	            <field name='living_area' string = 'Living Area (sqm)'/>
 	            <field name='expected_price'/>
 	            <field name='selling_price'/>
 	            <field name='date_availability' string = 'Avalible'/>
+	            <field name='description'/>
+				<field name='bedrooms'/>
+				<field name='living_area'/>
+				<field name='garden' string ="Garden" />
+				<field name='facades'/>
+				<field name='garage'/>
 	        </tree>
 	    </field>
 	</record>
@@ -42,8 +48,15 @@
 							<field name='living_area'/>
 	       					<field name='facades'/>
 	       					<field name='garage'/>
-	       					<field name='garden'/>
-	       				</group>
+	       					
+	       					<field name="state"/>
+	       					</group>
+	       				</page>
+	       				<page string = "Garden">
+	       					<group>
+	       						<field name='garden'/>
+	       						<field name="garden_orientation" attrs="{'invisible':[('garden','=',False)]}"/>
+	       					</group>
 	       				</page>
 	       			</notebook>
 	       		</sheet>
@@ -66,7 +79,7 @@
 				<field name='garden'/>
 				<field name='facades'/>
 				<field name='garage'/>
-				<filter name ="avalible" string ="Avalible" domain = "[('state','in' ['new','offer_received'])]"/>
+				<filter name ="avalible" string ="Avalible" domain = "[('state','in' ,['new','offer_received'])]"/>
 				<filter name ="grup_by_postcode" string ="Postcode" context="{'group_by' : 'postcode'}" />
 			</search>
 	    </field>
