@@ -55,4 +55,21 @@ class EstateProperty(models.Model):
         ],
         default='new',
         copy=False,
-    )       
+    ) 
+    property_type_id = fields.Many2one(
+        comodel_name = 'estate.property.type',
+    )      
+    buyer_id = fields.Many2one(
+      comodel_name = "res.partner",
+      copy = False,
+      string="Buyer"
+    )
+    seller_id = fields.Many2one(
+        comodel_name = "res.users",
+        default = lambda self : self.env.user,
+        string = "salesman",
+    )
+    tags_id=fields.Many2many(
+        comodel_name = "estate.property.tag",
+        string='Tags',
+    )
