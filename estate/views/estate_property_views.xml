@@ -18,6 +18,7 @@
 				<field name='garden' string ="Garden" />
 				<field name='facades'/>
 				<field name='garage'/>
+				<field name = "total_area"/>
 	        </tree>
 	    </field>
 	</record>
@@ -50,14 +51,18 @@
 							<field name='living_area'/>
 	       					<field name='facades'/>
 	       					<field name='garage'/>
-	       					
+	       					<field name='best_price'/>
 	       					<field name="state"/>
+	       					<field name = "date_deadline"/>
+	       					<field name = "validity"/>
 	       					</group>
 	       				</page>
 	       				<page string = "Garden">
 	       					<group>
 	       						<field name='garden'/>
+	       						<field name='garden_area'/>
 	       						<field name="garden_orientation" attrs="{'invisible':[('garden','=',False)]}"/>
+	       						<field name = "total_area"/>
 	       					</group>
 	       				</page>
 	       				<page string = "Other info">
@@ -65,6 +70,15 @@
 	       						<field name = "buyer_id"/>
 	       						<field name = "seller_id"/>
 	       					</group>
+	       				</page>
+	       				<page string ="Offers">
+	       						<field name = "offers_ids" nolabel="1">
+	       						<tree editable="bottom">
+	       							<field name ="price"/>
+	       							<field name ="partner_id"/>
+	       							<field name ="status"/>
+	       						</tree>
+	       					</field>
 	       				</page>
 	       			</notebook>
 	       		</sheet>

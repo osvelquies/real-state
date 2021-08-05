@@ -1,7 +1,7 @@
 # Copyright 2021, Ventacero
 # License LGPL-3.0 or later (http:.gnu.org/licenses/lgpt.html)
 
-from odoo import fields, models
+from odoo import fields, models, api
 # se importa fields desde la carpeta odoo fields.py y models.py
 
 
@@ -72,4 +72,68 @@ class EstateProperty(models.Model):
     tags_id=fields.Many2many(
         comodel_name = "estate.property.tag",
         string='Tags',
+    )
+    offers_ids = fields.One2many(
+        comodel_name = "estate.property.offer",
+        inverse_name = "property_id"
+    )
+    total_area = fields.Float(
+        compute ="_compute_total_area",   
+        inverse = "_inverse_total_area",
+    )
+    best_price = fields.Float(
+        compute = "_compute_best_price",
+    )
+    date_deadline =  fields.Date(
+        compute = "_compute_date_deadline",
+        inverse = "_inverse_date_deadline",
+    )
+    validity = fields.Integer(
+        default = 7,
+    )
+    @api.depends("validity","create_date")
+    def _compute_date_deadline(self):
+        for rec in self:
+            rec.date_deadline = fields.Date.add(
+                rec.create_date, days=+rec.validity
+            ) 
+    def _inverse_date_deadline(self):
+        for rec in self:
+            rec.validity = (rec.date_deadline - rec.create_date.date()).days
+
+    @api.depends('living_area','garden_area')
+    def _compute_total_area(self):
+        for rec in self:
+            rec.total_area = rec.living_area + rec.garden_area
+    def _inverse_total_area(self):
+        for rec in self:
+            rec.garden_area = rec.total_area - rec.living_area
+    @api.depends('offers_ids.price')
+    def _compute_best_price(self):
+        for rec in self:
+            best_price =0
+            if rec.offers_ids:
+                best_price = max(rec.offers_ids.mapped('price'))
+            rec.best_price = best_price
+
+
+class EstatePropertyOffer(models.Model):
+    _name = "estate.property.offer"
+    _description = "Real Estate Property Offer"
+
+    price = fields.Float()
+    status = fields.Selection(
+        selection=[
+            ('accepted','Accepted'),
+            ("refused","Refused"),
+        ],
+        copy = False,
+    )
+    partner_id = fields.Many2one(
+        comodel_name = "res.partner",
+        required = True,
+    )
+    property_id = fields.Many2one(
+        comodel_name = "estate.property",
+        required = True,
     )
