@@ -23,6 +23,7 @@
 	    </field>
 	</record>
 	<record model='ir.ui.view' id='estate_property_form'>
+		
 	    <field name='name'>estate_property.form</field>
 	    <field name='model'>estate.property</field>
 	    <field name='arch' type='xml'>
@@ -88,7 +89,7 @@
 	       				<page string ="Offers">
 	       						<field name = "offers_ids" nolabel="1">
 	       						<tree editable="bottom">
-	       							<field name ="price"/>
+	       							<field name ="price" style="width:10%%"/>
 	       							<field name ="partner_id"/>
 	       							<field name ="status"/>
 	       							<button name="action_accept" string = "Accept" type = "object" icon="fa-check"/>

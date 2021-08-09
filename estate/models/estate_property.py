@@ -2,7 +2,7 @@
 # License LGPL-3.0 or later (http:.gnu.org/licenses/lgpt.html)
 
 from odoo import fields, models, api
-from odoo.exceptions import UserError
+from odoo.exceptions import ValidationError,UserError
 # se importa fields desde la carpeta odoo fields.py y models.py
 
 
@@ -14,6 +14,7 @@ class EstateProperty(models.Model):
         string="Nombre", 
         required=True,
         default="Unknown",
+        copy=False,
     )  
     # definir variable name con nombre por default
     description = fields.Text()
@@ -92,7 +93,16 @@ class EstateProperty(models.Model):
     validity = fields.Integer(
         default = 7,
     )
-    
+    _sql_constraints = [
+        ('name_uniq','unique(name)','El nombre ya existe'),
+        ('expected_price_positive','check(expected_price > 0)','El precio debde ser positivo'),
+        ('selling_price_positve','check(selling_price > 0)','El precio de venta debe ser mayor a 0')
+    ]
+    @api.constrains('selling_price')
+    def _check_selling_price(self):
+        for rec in self:
+            if rec.selling_price < (rec.expected_price * 0.90):
+                raise ValidationError("El precio de venta debe ser el 90 porciento de el precio esperado")    
     def action_sold(self):
         for rec in self:
             if rec.state == 'canceled':
@@ -108,9 +118,9 @@ class EstateProperty(models.Model):
     @api.depends("validity","create_date")
     def _compute_date_deadline(self):
         for rec in self:
-            create_date = rec.create_date or field.Date.context_today(rec)
+            create_date = rec.create_date or fields.Date.context_today(rec)
             rec.date_deadline = fields.Date.add(
-                rec.create_date, days=+rec.validity) 
+                create_date, days=+rec.validity) 
     def _inverse_date_deadline(self):
         for rec in self:
             rec.validity = (rec.date_deadline - rec.create_date.date()).days
@@ -150,6 +160,7 @@ class EstatePropertyOffer(models.Model):
     property_id = fields.Many2one(
         comodel_name = "estate.property",
         required = True,
+        ondelete= 'cascade'
     )
     def action_accept (self):
         for rec in self:
@@ -163,4 +174,4 @@ class EstatePropertyOffer(models.Model):
     def action_refuse(self):
         for rec in self:
             rec.status = "refused"
-            selling_price = 0.00
+            
