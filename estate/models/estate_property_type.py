@@ -8,9 +8,18 @@ from odoo import fields, models
 class EstatePropertyType(models.Model):
     _name = "estate.property.type"    # nombre tecnico
     _description = "Real Estate Property Type"  # nombre FUncional o Comun
-
+    _order="sequence"
     name = fields.Char(
         required= True,
+    )
+    property_ids = field_name_ids = fields.One2many(
+        comodel_name = 'estate.property',
+        inverse_name= "property_type_id",
+        string ="Properties",
+    )
+
+    sequence = fields.Integer(
+        default = 10
     )
     _sql_constraints = [
         ('name_uniq','unique(name)','El nombre ya existe'),

@@ -8,14 +8,14 @@
     'website': 'https://www.jarsa.com.mx/',
     'author': 'OmarEsparza',
     'license': 'LGPL-3',
-    'application': False,
+    'application': True,
     'installable': True,
     'external_dependencies': {
         'python': [],
         'bin': [],
     },
     'depends': [
-        'base',
+        'base','web','website'
     ],
     'data': [
         'security/ir.model.access.csv',

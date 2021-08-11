@@ -6,9 +6,12 @@ from odoo import fields, models
 class EstatePropertyTag(models.Model):
     _name = "estate.property.tag"    # nombre tecnico
     _description = "Real Estate Property Type"  # nombre FUncional o Comun
-
+    _order = 'name'
     name = fields.Char(
         required=True,
+    )
+    color = fields.Integer(
+        default = 5,
     )
     _sql_constraints = [
         ('name_uniq','unique(name)','El nombre ya existe'),

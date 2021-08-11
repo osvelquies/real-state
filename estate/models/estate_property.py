@@ -3,13 +3,14 @@
 
 from odoo import fields, models, api
 from odoo.exceptions import ValidationError,UserError
+from odoo.tools.float_utils import float_compare 
 # se importa fields desde la carpeta odoo fields.py y models.py
 
 
 class EstateProperty(models.Model):
     _name = "estate.property"    # nombre tecnico
     _description = "Properties"  # nombre FUncional o Comun
-
+    _order ="id desc"
     name = fields.Char(
         string="Nombre", 
         required=True,
@@ -60,6 +61,7 @@ class EstateProperty(models.Model):
     ) 
     property_type_id = fields.Many2one(
         comodel_name = 'estate.property.type',
+        ondelte = "restrict"
     )      
     buyer_id = fields.Many2one(
       comodel_name = "res.partner",
@@ -98,11 +100,14 @@ class EstateProperty(models.Model):
         ('expected_price_positive','check(expected_price > 0)','El precio debde ser positivo'),
         ('selling_price_positve','check(selling_price > 0)','El precio de venta debe ser mayor a 0')
     ]
-    @api.constrains('selling_price')
+    @api.constrains('selling_price','expected_price')
     def _check_selling_price(self):
         for rec in self:
-            if rec.selling_price < (rec.expected_price * 0.90):
-                raise ValidationError("El precio de venta debe ser el 90 porciento de el precio esperado")    
+            expected_price = rec.expected_price *0.9
+            if  rec.selling_price>0 & float_compare(rec.selling_price,expected_price,2) == -1:
+                raise UserError("El precio de venta debe ser al menos el 90%%"
+                                "de el precio esperado"
+                )    
     def action_sold(self):
         for rec in self:
             if rec.state == 'canceled':
@@ -144,7 +149,7 @@ class EstateProperty(models.Model):
 class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Real Estate Property Offer"
-
+    _order = 'price desc'
     price = fields.Float()
     status = fields.Selection(
         selection=[
