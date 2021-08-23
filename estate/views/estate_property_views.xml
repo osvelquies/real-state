@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-	<data>
-			<!-- <template id="assets_frontend_snippets" inherit_id="web.assets_backend" name ="Website Snippets">
-					<xpath expr="." position = "inside">
-						<script type="text/javascript" src="/estate/static/src/js/estate_property.js"></script>
-					</xpath>
-			</template> -->
-			
 			<record model='ir.ui.view' id='estate_property_tree'>
 			    <field name='name'>estate_property.tree</field>
 			    <field name='model'>estate.property</field>
 			    <field name='arch' type='xml'>
-			        <tree string='description' decoration-success="state == 'sold'" decoration-danger = "state == 'canceled'">
+			   <!-- <xpath expr="." position="inside"> -->
+			    	<!-- <script type="text/javascript" src="/estate/static/src/js/estate_property_columcons.js"></script> -->
+			    <!-- </xpath> -->
+			        <tree string='description' name="OSM" decoration-success="state == 'sold'" decoration-danger = "state == 'canceled'"> 
+			        	<field name="id"/>
 			            <field name='name' string = 'Title' />
 			            <field name='postcode' string = 'Postcode'/>
 			            <field name='bedrooms' string = 'Bedrooms'/>
@@ -35,9 +32,14 @@
 			    <field name='name'>estate_property.form</field>
 			    <field name='model'>estate.property</field>
 			    <field name='arch' type='xml'>
+			    
 			       <form>
+			       	<!-- <xpath expr="." position="inside">
+			    	
+			    		<script type='text/javascript' src='/estate/static/src/js/estate_property.js?v=73'></script>
+			    	</xpath> -->
 			       		<header>
-			       			<button type="button" id="boton" custom="click" name="boton" text="Try me"></button>
+			       			
 			       			<button name ="action_sold"
 			       					states="new,offer_received,offer_acepted,canceled"
 			       					string ="sold"
@@ -58,6 +60,7 @@
 		       		
 		       			<group>
 		       				<group>
+		       					
 		       					<field name='property_type_id' options="{'no_create' : True,'no_quick_create':True}"/>
 		       					<field name='postcode'/>
 		       					<field name='date_availability'/>
@@ -70,9 +73,10 @@
 		       			<notebook>
 		       				<page string='Description'>
 		       					<group>
+		       					
 		       					<field name='description'/>
 		       					<field name='bedrooms'/>
-								<field name='living_area'/>
+								<field name='living_area' class="larea"/>
 		       					<field name='facades'/>
 		       					<field name='garage'/>
 		       					<field name='best_price'/>
@@ -84,7 +88,7 @@
 		       				<page string = "Garden">
 		       					<group>
 		       						<field name='garden'/>
-		       						<field name='garden_area' attrs="{'invisible':[('garden','=',False)]}"  id="ga"/>
+		       						<field name='garden_area' class="garea"  attrs="{'invisible':[('garden','=',False)]}"/>
 		       						<field name="garden_orientation" attrs="{'invisible':[('garden','=',False)]}"/>
 		       						<field name = "total_area"/>
 		       					</group>
@@ -95,12 +99,13 @@
 		       						<field name = "seller_id"/>
 		       					</group>
 		       				</page>
-		       				<page string ="Offers">
+		       				<page string ="Offers" name="osm">
 		       						<field name = "offers_ids" nolabel="1" attrs="{'readonly':[('state','in',['sold','canceled']),]}">
-		       						<tree editable="bottom" default_order="price asc" decoration-danger="status=='refused'"	decoration-success ="status =='accepted'"> 
-		       							<field name ="price" style="width:20%%"/>
+		       						<tree  class="PruebaOSM" editable="bottom" default_order="price asc" decoration-danger="status=='refused'"	decoration-success ="status =='accepted'"> 
+		       							<field name ="price" style="width:150px"/>
 		       							<field name ="partner_id"/>
 		       							<field name ="status" invisible="1"/>
+		       							<field name="property_type_id"/>
 		       							<button name="action_accept"
 		       									string = "Accept" 
 		       									type = "object" 
@@ -116,7 +121,9 @@
 		       				</page>
 		       			</notebook>
 		       		</sheet>
+
 		       </form>
+		   
 		    </field>
 		</record>
 		<record model='ir.ui.view' id='estate_property_search'>
@@ -142,15 +149,60 @@
 				</search>
 		    </field>
 		</record>
+		<record model='ir.ui.view' id='estate_propert_offer_tree'>
+		    <field name='name'>estate_propert_offer.tree</field>
+		    <field name='model'>estate.property.offer</field>
+		    <field name='arch' type='xml'>
+		        <tree string='description'>
+		            <field name='partner_id'/>
+		            <field name= 'property_id'/>
+		            <field name='price'/>
+		            <field name='status'/>
+		        </tree>
+		    </field>
+		</record>
+		<record model="ir.ui.view" id="name_id_kanban">
+		    <field name="name">name_id.kanban</field>
+		    <field name="model">estate.property</field>
+		    <field name="arch" type="xml">
+		        <kanban records_draggable="0">
+				    <templates>
+				        <t t-name="kanban-box">
+				            <div class="oe_kanban_global_click">
+				                <field name="name"/>
+				                <span>Expected Price:</span>
+				                <field name="expected_price"/>
+
+				                <t t-if ="record.selling_price.raw_value" >
+				                	<span>Selling price:</span>
+				                	<field name="selling_price"/>
+				            	</t>
+				            	<t t-if ="record.best_price.raw_value" >
+				            		<span>Best Price:</span>
+				                	<field name="best_price"/>
+				            	</t>
+				            	<t t-if="record.tags_id">
+				                	<field name="tags_id" widget="many2many_tags"/>
+				            	</t>
+				            </div>
+				        </t>
+				    </templates>
+				</kanban>
+		    </field>
+		</record>
+		<record id="action_estate_property_offers" model="ir.actions.act_window">
+		    <field name="name">Offers</field>
+		    <field name="res_model">estate.property.offer</field> 
+		    <field name="view_mode">tree</field>
+		    <field name="domain"> [('property_type_id','=',active_id)] </field>
+		</record>
 		<record id="estate_property_action" model="ir.actions.act_window">
 		    <field name="name">Estate Property action</field>
 		    <field name="res_model">estate.property</field> 
-		    <field name="view_mode">tree,form</field>
+		    <field name="view_mode">tree,form,kanban</field>
 		    <field name="context"> {'search_default_avalible':1,'default_name':"Osmani TST"} </field>
 		</record>
 		<menuitem id="estate_menu_root" name="Real State"/>
 		<menuitem id="advertisements_menu" name="Advertisements" parent="estate_menu_root"/>
 		<menuitem id="real_state_menu_action" action="estate_property_action" parent="advertisements_menu"/>
-
-	</data>
 </odoo>

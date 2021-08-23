@@ -10,7 +10,7 @@ from odoo.tools.float_utils import float_compare
 class EstateProperty(models.Model):
     _name = "estate.property"    # nombre tecnico
     _description = "Properties"  # nombre FUncional o Comun
-    _order ="id desc"
+    _order ="id asc"
     name = fields.Char(
         string="Nombre", 
         required=True,
@@ -94,18 +94,28 @@ class EstateProperty(models.Model):
     )
     validity = fields.Integer(
         default = 7,
-    )
+    ) 
     _sql_constraints = [
         ('name_uniq','unique(name)','El nombre ya existe'),
         ('expected_price_positive','check(expected_price > 0)','El precio debde ser positivo'),
         ('selling_price_positve','check(selling_price > 0)','El precio de venta debe ser mayor a 0')
     ]
+
+
+
+
+    # @api.model_create_multi
+    # def create (self,vals_list):
+    #     for var in vals_list
+    #     return super().create(vals_list)
+
     @api.constrains('selling_price','expected_price')
     def _check_selling_price(self):
         for rec in self:
             expected_price = rec.expected_price *0.9
-            if  rec.selling_price>0 & float_compare(rec.selling_price,expected_price,2) == -1:
-                raise UserError("El precio de venta debe ser al menos el 90%%"
+            if  rec.selling_price>0:  
+                if float_compare(rec.selling_price,expected_price,2) == -1:
+                    raise UserError("El precio de venta debe ser al menos el 90%"
                                 "de el precio esperado"
                 )    
     def action_sold(self):
@@ -137,6 +147,8 @@ class EstateProperty(models.Model):
     def _inverse_total_area(self):
         for rec in self:
             rec.garden_area = rec.total_area - rec.living_area
+    
+            
     @api.depends('offers_ids.price')
     def _compute_best_price(self):
         for rec in self:
@@ -144,6 +156,17 @@ class EstateProperty(models.Model):
             if rec.offers_ids:
                 best_price = max(rec.offers_ids.mapped('price'))
             rec.best_price = best_price
+    def unlink(self):
+        """ Delete all record(s) from table heaving record id in ids
+        return True on success, False otherwise
+    
+        :return: True on success, False otherwise
+        :rtype: Boolean
+        """
+        for rec in self:
+            if rec.state not in ['new','canceled']:
+                raise UserError('No puedes eliminar un registro que no sea nuevo o cancelado')
+        return super().unlink()
 
 
 class EstatePropertyOffer(models.Model):
@@ -167,6 +190,18 @@ class EstatePropertyOffer(models.Model):
         required = True,
         ondelete= 'cascade'
     )
+    property_type_id = fields.Many2one(
+        related = "property_id.property_type_id",
+    )
+    @api.model
+    def create(self, vals):
+        estate_property = self.env['estate.property'].browse(vals.get('property_id',False))
+        prices = estate_property.offers_ids.mapped('price')
+        if prices:
+            max_offer = max(prices)
+            if vals.get('price') < max_offer:
+                raise UserError('No se puede aceptar una oferta menor a las existentes')
+        return super().create(vals)
     def action_accept (self):
         for rec in self:
             if any ([x == 'accepted' for x in rec.property_id.offers_ids.mapped('status')]):
